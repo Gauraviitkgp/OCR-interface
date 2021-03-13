@@ -67,16 +67,22 @@ def recognize():
         A = threading.Thread(target=start_tess, args=(rqst,))
         threads.append(A)
         A.start()
+        print("Request",rqst.requestID,"processed")
         return jsonify(rqst.dict_rID)
     return "Request not processed.\n"
 
 @app.route('/image', methods=['GET','POST'])
 def check():
     data       = request.get_json(force=True)
-    if int(data["task_id"]) not in tasks:
+    try:
+        task_id = int(data["task_id"])
+    except ValueError:
+        return "ERROR: Please enter an integer value in task_id column"
+
+    if task_id not in tasks:
         return "ERROR: The specified task id does not exist. Please check"
     else:
-        return jsonify(tasks[int(data["task_id"])].dict_otpt)
+        return jsonify(tasks[task_id].dict_otpt)
     
 app.run()
 # x = threading.Thread(target=recognize, args=())
