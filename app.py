@@ -7,7 +7,6 @@ import cv2
 import pytesseract
 import threading 
 import time
-
 class img_rqst():
     def __init__(self,request,requestID=0):
         self.error      = {"error":0,"message":""}
@@ -27,7 +26,6 @@ class img_rqst():
         # self.run_tesseract()
         
     def run_tesseract(self):
-        time.sleep(20)
         if self.__decode_img__():
             return
         self.__apply_tess__()
@@ -107,6 +105,6 @@ def check():
             return jsonify(tasks[task_id].error)
         return jsonify(tasks[task_id].dict_otpt)
     
-app.run()
+app.run(port=5000,host='0.0.0.0')
 for thread in threads:
     thread.join()
