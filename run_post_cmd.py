@@ -1,5 +1,4 @@
 import cv2
-import os
 import base64
 import requests
 #remove-item alias:\curl
