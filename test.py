@@ -1,53 +1,46 @@
-import flask
-from flask import request, jsonify
-app = flask.Flask(__name__)
-app.config["DEBUG"] = True
+import cv2
+import base64
+import requests
+#remove-item alias:\curl
+#curl -XGET "http://localhost:5000/image" -d '{\"task_id\": \"3\"}'
+import json
 
-books = [
-    {'id': 0,
-     'title': 'A Fire Upon the Deep',
-     'author': 'Vernor Vinge',
-     'first_sentence': 'The coldsleep itself was dreamless.',
-     'year_published': '1992'},
-    {'id': 1,
-     'title': 'The Ones Who Walk Away From Omelas',
-     'author': 'Ursula K. Le Guin',
-     'first_sentence': 'With a clamor of bells that set the swallows soaring, the Festival of Summer came to the city Omelas, bright-towered by the sea.',
-     'published': '1973'},
-    {'id': 2,
-     'title': 'Dhalgren',
-     'author': 'Samuel R. Delany',
-     'first_sentence': 'to wound the autumnal city.',
-     'published': '1975'}
-]
+def display_image(Img):
+    cv2.imshow('Image',Img)
+    cv2.waitKey(1000)
 
-@app.route('/', methods=['GET'])
-def home():
-    return "<h1>Distant Reading Archive</h1><p>This site is a prototype API for distant reading of science fiction novels.</p>"
-@app.route('/api/v1/resources/books/all', methods=['GET'])
-def api_all():
-    return jsonify(books)
+def send_data(jpg_as_text):
+    url = "http://localhost:5000/image-sync"
+    data = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\""}
+    # json.
+    res = requests.post(url, data=json.dumps(data))
+    json_data = json.loads(res.text)
+    return json_data
 
-@app.route('/api/v1/resources/books', methods=['GET'])
-def api_id():
-    # Check if an ID was provided as part of the URL.
-    # If ID is provided, assign it to a variable.
-    # If no ID is provided, display an error in the browser.
-    if 'id' in request.args:
-        id = int(request.args['id'])
-    else:
-        return "Error: No id field provided. Please specify an id."
+def recieve_output(task_id):
+    url = "http://localhost:5000/image"
+    data = {"task_id": task_id}
 
-    # Create an empty list for our results
-    results = []
+    res = requests.get(url, data=json.dumps(data))
+    print(res.text)
 
-    # Loop through the data and match results that fit the requested ID.
-    # IDs are unique, but other fields might return many results
-    for book in books:
-        if book['id'] == id:
-            results.append(book)
 
-    # Use the jsonify function from Flask to convert our list of
-    # Python dictionaries to the JSON format.
-    return jsonify(results)
-app.run()
+ids = []
+for i in range(1):
+    imagename = 'test_img/'+str(i)+'.png'
+
+    Img             = cv2.imread(imagename)
+    # display_image(Img) 
+    retval, buffer  = cv2.imencode(imagename[-4:], Img)
+    jpg_as_text     = base64.b64encode(buffer)
+
+    ids.append(send_data(jpg_as_text)['task_id'])
+
+for i in ids:
+    recieve_output(i)
+
+# Get Curl command for the image
+# J = "curl -XPOST \"http://localhost:5000/image-sync\" -d '{\\\"image_data\\\":\\\""+str(jpg_as_text)[2:-1]+"\\\"}'"
+# print(J)
+
+# print("\\")

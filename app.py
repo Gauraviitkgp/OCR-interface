@@ -7,6 +7,8 @@ import cv2
 import pytesseract
 import threading 
 import time
+import os
+
 class img_rqst():
     def __init__(self,request,requestID=0):
         self.error      = {"error":0,"message":""}
@@ -50,6 +52,7 @@ class img_rqst():
     def __apply_tess__(self):
         self.tess_otpt = pytesseract.image_to_string(self.img)
         self.dict_otpt = {"text":self.tess_otpt}
+        print("Request",self.requestID,"completed" )
 
     def show(self,windowname="Input_Image",waitkey=1000):
         cv2.imshow(windowname,self.img)
@@ -84,7 +87,7 @@ def recognize():
         A = threading.Thread(target=start_tess, args=(rqst,))
         threads.append(A)
         A.start()
-        print("Request",rqst.requestID,"processed")
+        print("Request",rqst.requestID,"initiated")
         return jsonify(rqst.dict_rID)
     return "Request not processed.\n"
 
@@ -94,7 +97,7 @@ def check():
     try:
         task_id = int(data["task_id"])
     except ValueError:
-        return "ERROR: Please enter an integer value in task_id column"
+        return "ERROR: Please enter an integer value in task_id column; Currently entered:"+data["task_id"]
     except KeyError:
         return "ERROR: Please enter a column with name \"task_id\""
 
@@ -105,6 +108,10 @@ def check():
             return jsonify(tasks[task_id].error)
         return jsonify(tasks[task_id].dict_otpt)
     
-app.run(port=5000,host='0.0.0.0')
+# app.run(port=5000,host='0.0.0.0')
+if os.name == 'nt':
+    app.run(port=5000)
+else:
+    app.run(port=5000,host='0.0.0.0')
 for thread in threads:
     thread.join()
