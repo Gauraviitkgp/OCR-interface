@@ -10,23 +10,29 @@ def display_image(Img):
     cv2.waitKey(1000)
 
 def send_data(jpg_as_text):
-    url = "http://localhost:5000/image-sync"
-    data = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\""}
+    url         = "http://localhost:5000/image-sync"
+    data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\""}
     # json.
-    res = requests.post(url, data=json.dumps(data))
-    json_data = json.loads(res.text)
+    res         = requests.post(url, data=json.dumps(data))
+    json_data   = json.loads(res.text)
     return json_data
 
 def recieve_output(task_id):
-    url = "http://localhost:5000/image"
-    data = {"task_id": task_id}
+    url         = "http://localhost:5000/image"
+    data        = {"task_id": task_id}
 
-    res = requests.get(url, data=json.dumps(data))
-    print(res.text)
+    res         = requests.get(url, data=json.dumps(data))
+    json_data   = json.loads(res.text)
+    if json_data["text"] is not None:
+        print(res.text)
+        return 0
+    else:
+        return 1
+
 
 
 ids = []
-for i in range(4):
+for i in range(1):
     imagename = 'test_img/'+str(i)+'.png'
 
     Img             = cv2.imread(imagename)
@@ -37,8 +43,9 @@ for i in range(4):
     ids.append(send_data(jpg_as_text)['task_id'])
 
 for i in ids:
-    while i is "null":
-        recieve_output(i)
+    while recieve_output(i):
+        pass
+
 
 # Get Curl command for the image
 # J = "curl -XPOST \"http://localhost:5000/image-sync\" -d '{\\\"image_data\\\":\\\""+str(jpg_as_text)[2:-1]+"\\\"}'"

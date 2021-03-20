@@ -38,7 +38,6 @@ class img_rqst():
         """
         if self.__decode_img__():
             return
-        time.sleep(10)
         self.__apply_tess__()
         
     def __check_for_errors__(self):
@@ -49,6 +48,9 @@ class img_rqst():
         """
         if 'image_data' not in self.data:
             self.error  = {"error":1,"message":"ERROR: Please Enter \"image_data\" data in column"}
+            return 1
+        elif self.data['image_data'] is "":
+            self.error  = {"error":1,"message":"ERROR: Please Enter Some \"image_data\" data in column"}
             return 1
         return 0
 
@@ -148,6 +150,11 @@ def check():
 
 @app.route('/threads', methods=['GET'])
 def print_active_threads():
+    """Prints the list of active threads
+
+    Returns:
+        str: List of Active threads in seperate lines
+    """
     main_thread = threading.current_thread()
     threads = ""
     for t in threading.enumerate():
