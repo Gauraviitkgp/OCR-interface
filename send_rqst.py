@@ -15,11 +15,12 @@ def send_data(jpg_as_text):
     # json.
     res         = requests.post(url, data=json.dumps(data))
     json_data   = json.loads(res.text)
+    print(res.text)
     return json_data
 
-def recieve_output(task_id):
+def recieve_output(task_id,token_id):
     url         = "http://localhost:5000/image"
-    data        = {"task_id": task_id}
+    data        = {"task_id": task_id,"token":token_id}
 
     res         = requests.get(url, data=json.dumps(data))
     json_data   = json.loads(res.text)
@@ -40,10 +41,10 @@ for i in range(1):
     retval, buffer  = cv2.imencode(imagename[-4:], Img)
     jpg_as_text     = base64.b64encode(buffer)
 
-    ids.append(send_data(jpg_as_text)['task_id'])
+    ids.append(send_data(jpg_as_text))
 
 for i in ids:
-    while recieve_output(i):
+    while recieve_output(i['task_id'],i['token']):
         pass
 
 

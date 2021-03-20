@@ -8,6 +8,10 @@ import pytesseract
 import threading 
 import time
 import os
+import jwt
+import datetime
+
+SECRET_KEY =  os.urandom(24)
 
 class img_rqst():
     def __init__(self,request,requestID=0):
@@ -22,6 +26,7 @@ class img_rqst():
         self.request    = request
         self.requestID  = requestID
         self.data       = request.get_json(force=True)
+        self.token      = None
         if self.__check_for_errors__():
             return
         self.img        = None
@@ -29,9 +34,44 @@ class img_rqst():
         self.tess_otpt  = None
         self.dict_otpt  = {"text":None}
 
-        self.dict_rID   = {"task_id": str(requestID)}
+        self.__encode_auth_token__()
+
+        self.dict_rID   = {"task_id": str(requestID),"token":self.token}
         
         # self.run_tesseract()
+    def __encode_auth_token__(self):
+        """
+            Generates the Auth Token
+            :return: string
+        """
+        try:
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=120),
+                'iat': datetime.datetime.utcnow(),
+                'sub': self.requestID
+            }
+            self.token =  jwt.encode(
+                payload,
+                SECRET_KEY,
+                algorithm='HS256'
+            )
+        except Exception as e:
+            return e
+    def decode_auth_token(self,auth_token):
+        """
+        Decodes the auth token
+        :param auth_token:
+        :return: integer|string
+        """
+        try:
+            payload = jwt.decode(auth_token,SECRET_KEY,algorithms='HS256')
+            return 0
+        except jwt.ExpiredSignatureError:
+            self.error  = {"error":1,"message":"ERROR: Signature expired. Please use a new request."}
+            return 1
+        except jwt.InvalidTokenError:
+            self.error  = {"error":1,"message":"ERROR: Invalid token. Please try again with Valid Token"}
+            return 1
         
     def run_tesseract(self):
         """Runs the tessereact OCR engine by calling specific steps
@@ -170,9 +210,13 @@ def check():
     except KeyError:
         return "ERROR: Please enter a column with name \"task_id\""
 
+    if "token" not in data:
+        return "ERROR: Token is not specified. Please add a token column into your data"
+
     if task_id not in tasks:
         return "ERROR: The specified task id does not exist. Please check"
     else:
+        tasks[task_id].decode_auth_token(data["token"])
         if tasks[task_id].error["error"]:
             return jsonify(tasks[task_id].error)
         return jsonify(tasks[task_id].dict_otpt)
@@ -185,7 +229,7 @@ def print_active_threads():
         str: List of Active threads in seperate lines
     """
     main_thread = threading.current_thread()
-    threads = ""
+    threads     = ""
     for t in threading.enumerate():
         if t is main_thread:
             continue
@@ -199,5 +243,6 @@ if os.name == 'nt':
     app.run(port=5000)
 else:
     app.run(port=5000,host='0.0.0.0')
+
 for thread in threads:
     thread.join()

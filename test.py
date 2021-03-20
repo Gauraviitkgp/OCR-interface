@@ -11,6 +11,7 @@ Img         = cv2.imread(imagename)
 _, buffer   = cv2.imencode(imagename[-4:], Img)
 jpg_as_text = base64.b64encode(buffer)
 url         = "http://localhost:5000/image-sync"
+url1        = "http://localhost:5000/image"
 
 # Test 1: Send no data
 data        = ""
@@ -48,9 +49,9 @@ res         = requests.post(url, data=json.dumps(data))
 print("Running test 7:\n",res.text)
 
 # Test 8: Send 60 requests
-# for i in range(60):
-#     res         = requests.post(url, data=json.dumps(data))
-#     print("Running test 8:\n",res.text)
+for i in range(60):
+    res         = requests.post(url, data=json.dumps(data))
+    print("Running test 8:\n",res.text)
 
 # Test 9: Send a dict in image_data requests incorrect
 data        = {"image_data": {"1":"233","2":"2332"}}
@@ -86,3 +87,28 @@ print("Running test 14:\n",res.text)
 data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\"","model":"faltu"}
 res         = requests.post(url, data=json.dumps(data))
 print("Running test 15:\n",res.text)
+
+# Test 16: Check incorrect task id
+data        = {"task_id": 541131,"token":0}
+res         = requests.post(url1, data=json.dumps(data))
+print("Running test 16:\n",res.text)
+
+# Test 17: Check no task id
+data        = {"token":0}
+res         = requests.post(url1, data=json.dumps(data))
+print("Running test 17:\n",res.text)
+
+# Test 18: Check empty
+data        = {}
+res         = requests.post(url1, data=json.dumps(data))
+print("Running test 18:\n",res.text)
+
+# Test 19: Check no token id
+data        = {"task_id": 0}
+res         = requests.post(url1, data=json.dumps(data))
+print("Running test 19:\n",res.text)
+
+# Test 20: Random token id
+data        = {"task_id": 0,"token":0}
+res         = requests.post(url1, data=json.dumps(data))
+print("Running test 19:\n",res.text)
