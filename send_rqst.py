@@ -26,7 +26,7 @@ def recieve_output(task_id):
 
 
 ids = []
-for i in range(1):
+for i in range(4):
     imagename = 'test_img/'+str(i)+'.png'
 
     Img             = cv2.imread(imagename)
@@ -37,7 +37,8 @@ for i in range(1):
     ids.append(send_data(jpg_as_text)['task_id'])
 
 for i in ids:
-    recieve_output(i)
+    while i is "null":
+        recieve_output(i)
 
 # Get Curl command for the image
 # J = "curl -XPOST \"http://localhost:5000/image-sync\" -d '{\\\"image_data\\\":\\\""+str(jpg_as_text)[2:-1]+"\\\"}'"
