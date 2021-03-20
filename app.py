@@ -36,10 +36,34 @@ class img_rqst():
     def run_tesseract(self):
         """Runs the tessereact OCR engine by calling specific steps
         """
-        if self.__decode_img__():
-            return
-        self.__apply_tess__()
+        temp = self.data['image_data']
+        if type(self.data['image_data']) is dict:
+            self.dict_otpt["text"] = {}
+            for key,values in temp.items():
+                self.data['image_data'] = values
+                if self.__decode_img__():
+                    self.error["message"] += " image id:"+key
+                    return
+                tess_otpt = self.__apply_tess__()
+                self.dict_otpt["text"][key] = tess_otpt["text"]
+
+        elif type(self.data['image_data']) is list:
+            self.dict_otpt["text"] = []
+            for values in temp:
+                self.data['image_data'] = values
+                if self.__decode_img__():
+                    self.error["message"] += " image code:"+values
+                    return
+                tess_otpt = self.__apply_tess__()
+                self.dict_otpt["text"].append(tess_otpt["text"])
+        else:
+            if self.__decode_img__():
+                return
+            self.dict_otpt = self.__apply_tess__()
+
+        self.data['image_data'] = temp 
         
+        print("Request",self.requestID,"completed" )
     def __check_for_errors__(self):
         """Checks for Errors if any. Any error would be appended to self.error as a dict
 
@@ -60,7 +84,7 @@ class img_rqst():
 
         Returns:
             int: 1 if decoding encountered an error 0 if not
-        """
+        """            
         encoded64_image = self.data['image_data']
         try:
             image_64_decode = base64.decodebytes(encoded64_image.encode(encoding=self.encoding))
@@ -74,9 +98,14 @@ class img_rqst():
     def __apply_tess__(self):
         """Applies tesseract for the decoded image
         """
-        self.tess_otpt = pytesseract.image_to_string(self.img)
-        self.dict_otpt = {"text":self.tess_otpt}
-        print("Request",self.requestID,"completed" )
+        if 'model' not in self.data or self.data['model'] == 'tesseract':
+            self.tess_otpt = pytesseract.image_to_string(self.img)
+        elif self.data['model'] == 'custom':
+            self.tess_otpt = 0
+        else:
+            self.error  = {"error":1,"message":"ERROR: Model not found please check current avialable models are custom and tesseract"}
+        
+        return {"text":self.tess_otpt}
 
     def show(self,windowname="Input_Image",waitkey=1000):
         """Displays the input image
