@@ -90,21 +90,23 @@ class img_rqst():
             self.dict_otpt["text"] = dct_output
 
         elif type(self.data['image_data']) is list:
-            self.dict_otpt["text"] = []
+            dct_otpt = []
+            # self.dict_otpt["text"] = []
             for values in temp:
                 self.data['image_data'] = values
                 if self.__decode_img__():
                     self.error["message"] += " image code:"+values
                     return
                 tess_otpt = self.__apply_tess__()
-                self.dict_otpt["text"].append(tess_otpt["text"])
+                dct_otpt.append(tess_otpt["text"])
+            self.dict_otpt["text"] = dct_otpt
         else:
             if self.__decode_img__():
                 return
             self.dict_otpt = self.__apply_tess__()
 
         self.data['image_data'] = temp 
-        
+        self.dict_otpt.update(self.error)
         print("Request",self.requestID,"completed" )
     def __check_for_errors__(self):
         """Checks for Errors if any. Any error would be appended to self.error as a dict

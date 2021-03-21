@@ -22,10 +22,10 @@ def display_image(Img):
 def send_data(jpg_as_text):
     url         = "http://localhost:5000/image-sync"
     if type(jpg_as_text) is dict:
-        data        = {"image_data": jpg_as_text,"model":"custom"}
+        data        = {"image_data": jpg_as_text}
 
     else:
-        data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\"","model":"custom"}
+        data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\""}
     # json.
     res         = requests.post(url, data=json.dumps(data))
     json_data   = json.loads(res.text)
