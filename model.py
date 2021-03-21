@@ -19,7 +19,10 @@ CHARS   = ' '+'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'+';:><.,+=-_
 IMG_SIZE        = 30
 BATCH_SIZE      = 100
 LR              = 1e-3
-CHPK_PATH       = "checkpoints\\cp.ckpt"
+if os.name == 'nt':
+    CHPK_PATH   = "checkpoints\\cp.ckpt"
+else:
+    CHPK_PATH   = "./checkpoints/cp.ckpt"
 CHAR_SIZE       = len(CHARS)
 EPOCHS          = 100
 
@@ -94,7 +97,7 @@ class images():
         im2         = self.input.copy()
         for i,cnt in enumerate(ctrs[1] ):
             x, y, w, h = cnt
-            if w*h>50*50:
+            if w*h>(self.input.shape[0]//20)*(self.input.shape[1]//10):
                 self.lineco.append([x, y])
 
         self.tot_lines = len(self.lineco)
@@ -116,7 +119,7 @@ class images():
         im2         = self.input.copy()
         for i,cnt in enumerate(ctrs[1] ):
             x, y, w, h = cnt
-            if w*h>25*20:
+            if w*h>(self.input.shape[0]//40)*(self.input.shape[1]//25):
                 k = np.argmin(np.abs(self.lineco[:,1]-y))
                 roi = thresh1[y:y + h, x:x + w]
                 thresh = roi

@@ -1,2 +1,4 @@
 *venv*
 *.vscode*
+generate_char_dataset.py
+*__pycache__
