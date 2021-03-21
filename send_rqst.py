@@ -11,7 +11,7 @@ def display_image(Img):
 
 def send_data(jpg_as_text):
     url         = "http://localhost:5000/image-sync"
-    data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\""}
+    data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\"","model":"custom"}
     # json.
     res         = requests.post(url, data=json.dumps(data))
     json_data   = json.loads(res.text)
@@ -34,7 +34,7 @@ def recieve_output(task_id,token_id):
 
 ids = []
 for i in range(1):
-    imagename = 'test_img/'+str(i)+'.png'
+    imagename = 'test_img/inpt.png'
 
     Img             = cv2.imread(imagename)
     # display_image(Img) 

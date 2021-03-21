@@ -10,7 +10,7 @@ import time
 import os
 import jwt
 import datetime
-
+from model import get_text
 SECRET_KEY =  os.urandom(24)
 
 class img_rqst():
@@ -141,7 +141,9 @@ class img_rqst():
         if 'model' not in self.data or self.data['model'] == 'tesseract':
             self.tess_otpt = pytesseract.image_to_string(self.img)
         elif self.data['model'] == 'custom':
-            self.tess_otpt = 0
+            # print(self.img.shape)
+            backtorgb = cv2.cvtColor(self.img,cv2.COLOR_GRAY2RGB)
+            self.tess_otpt = get_text(backtorgb)
         else:
             self.error  = {"error":1,"message":"ERROR: Model not found please check current avialable models are custom and tesseract"}
         
