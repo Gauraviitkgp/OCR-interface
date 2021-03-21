@@ -12,7 +12,7 @@ FONTPATHS   = ['C:\\Windows\\Fonts\\verdanab.ttf','C:\\Windows\\Fonts\\ARIALN.TT
 LEN_DATASET = 10000 if DISPLAY is False else 10
 
 fontpaths   = random.choices(FONTPATHS,k=LEN_DATASET)
-bs,gs,rs,a  = 255,255,255,0
+bs,gs,rs,a  = 0,0,0,0
 # bgclr,ag    = np.random.randint(0,254,size=LEN_DATASET),0
 fontsizes   = 24
 textxpos    = HEIGHT//10 
@@ -25,7 +25,7 @@ X           = np.ones((LEN_DATASET,HEIGHT,WIDTH,CHANNELS), np.uint8)
 
 
 def generate_random_image():
-    blank_image = X[i]
+    blank_image = X[i]*255
     fontpath    = fontpaths[i]
     b,g,r       = bs,gs,rs
     font        = ImageFont.truetype(fontpath, fontsizes)
