@@ -1,9 +1,19 @@
 import cv2
 import base64
 import requests
+import os
+import time
 #remove-item alias:\curl
 #curl -XGET "http://localhost:5000/image" -d '{\"task_id\": \"3\"}'
 import json
+
+def load_images_from_folder(folder):
+    images = []
+    for filename in os.listdir(folder):
+        img = cv2.imread(os.path.join(folder,filename))
+        if img is not None:
+            images.append(img)
+    return images
 
 def display_image(Img):
     cv2.imshow('Image',Img)
@@ -11,7 +21,11 @@ def display_image(Img):
 
 def send_data(jpg_as_text):
     url         = "http://localhost:5000/image-sync"
-    data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\"","model":"custom"}
+    if type(jpg_as_text) is dict:
+        data        = {"image_data": jpg_as_text,"model":"custom"}
+
+    else:
+        data        = {"image_data": "\""+str(jpg_as_text)[2:-1]+"\"","model":"custom"}
     # json.
     res         = requests.post(url, data=json.dumps(data))
     json_data   = json.loads(res.text)
@@ -25,27 +39,33 @@ def recieve_output(task_id,token_id):
     res         = requests.get(url, data=json.dumps(data))
     json_data   = json.loads(res.text)
     if json_data["text"] is not None:
-        print(res.text)
+        print(task_id,"\n",res.text)
         return 0
     else:
         return 1
 
 
 
-ids = []
-for i in range(1):
-    imagename = 'test_img/inpt.png'
+folder = "test_img"
+images = os.listdir(folder)
+dct = {}
+print(images)
+for imagename in images:
 
-    Img             = cv2.imread(imagename)
+    Img             = cv2.imread(os.path.join(folder,imagename))
     # display_image(Img) 
-    retval, buffer  = cv2.imencode(imagename[-4:], Img)
+    retval, buffer  = cv2.imencode(os.path.join(folder,imagename)[-4:], Img)
     jpg_as_text     = base64.b64encode(buffer)
 
-    ids.append(send_data(jpg_as_text))
+    dct[imagename] = "\""+str(jpg_as_text)[2:-1]+"\""
 
-for i in ids:
-    while recieve_output(i['task_id'],i['token']):
-        pass
+# print(dct)
+ids = send_data(dct)
+
+
+while recieve_output(ids['task_id'],ids['token']):
+    time.sleep(1)
+    pass
 
 
 # Get Curl command for the image

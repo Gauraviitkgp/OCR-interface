@@ -78,14 +78,16 @@ class img_rqst():
         """
         temp = self.data['image_data']
         if type(self.data['image_data']) is dict:
-            self.dict_otpt["text"] = {}
+            dct_output = {}
+            # self.dict_otpt["text"] = {}
             for key,values in temp.items():
                 self.data['image_data'] = values
                 if self.__decode_img__():
                     self.error["message"] += " image id:"+key
                     return
                 tess_otpt = self.__apply_tess__()
-                self.dict_otpt["text"][key] = tess_otpt["text"]
+                dct_output[key] = tess_otpt["text"]
+            self.dict_otpt["text"] = dct_output
 
         elif type(self.data['image_data']) is list:
             self.dict_otpt["text"] = []
@@ -142,8 +144,14 @@ class img_rqst():
             self.tess_otpt = pytesseract.image_to_string(self.img)
         elif self.data['model'] == 'custom':
             # print(self.img.shape)
-            backtorgb = cv2.cvtColor(self.img,cv2.COLOR_GRAY2RGB)
-            self.tess_otpt = get_text(backtorgb)
+            try:
+                if len(self.img.shape)==2:
+                    backtorgb = cv2.cvtColor(self.img,cv2.COLOR_GRAY2RGB)
+                else:
+                    backtorgb = self.img
+                self.tess_otpt = get_text(backtorgb)
+            except:
+                self.error  = {"error":1,"message":"ERROR: Unknown error. Unable to run custom model Please try with tesseract"}
         else:
             self.error  = {"error":1,"message":"ERROR: Model not found please check current avialable models are custom and tesseract"}
         
