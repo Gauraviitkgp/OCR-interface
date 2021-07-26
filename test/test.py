@@ -4,7 +4,7 @@ import requests
 #remove-item alias:\curl
 #curl -XGET "http://localhost:5000/image" -d '{\"task_id\": \"3\"}'
 import json
-imagename = 'test_img/0.png'
+imagename = 'imgs/0.jpg'
 
 Img         = cv2.imread(imagename)
 # display_image(Img) 

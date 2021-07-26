@@ -10,7 +10,8 @@ import time
 import os
 import jwt
 import datetime
-from model import get_text
+import json
+from src.model import get_text
 SECRET_KEY =  os.urandom(24)
 
 class img_rqst():
@@ -214,13 +215,21 @@ def recognize():
 
 @app.route('/image', methods=['GET','POST'])
 def check():
-    data       = request.get_json(force=True)
-    try:
-        task_id = int(data["task_id"])
-    except ValueError:
-        return "ERROR: Please enter an integer value in task_id column; Currently entered:"+data["task_id"]
-    except KeyError:
-        return "ERROR: Please enter a column with name \"task_id\""
+    data        = request.get_json(force=True)
+    checker     = True
+    while(checker):
+        try:
+            task_id = int(data["task_id"])
+            checker=False
+        except ValueError:
+            return "ERROR: Please enter an integer value in task_id column; Currently entered:"+data["task_id"]
+        except KeyError:
+            return "ERROR: Please enter a column with name \"task_id\""
+        except TypeError:
+            if type(data) == str:
+                data = json.loads(data)
+            else:
+                return "ERROR: Incorrect dataype or bad JSON. Request received is " + data +" with datatype: "+ str(type(data))
 
     if "token" not in data:
         return "ERROR: Token is not specified. Please add a token column into your data"

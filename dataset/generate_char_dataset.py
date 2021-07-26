@@ -65,14 +65,14 @@ def generate_random_image():
     if DISPLAY:
         cv2.imshow("res",img)
         cv2.waitKey()
-        cv2.imwrite(".\\dataset\\"+str(i)+".png", img)
+        cv2.imwrite(str(i)+".png", img)
         cv2.destroyAllWindows()
 for i in range(LEN_DATASET):
     generate_random_image()
 
 if not DISPLAY:
-    np.savez_compressed('dataset\\X_char',X)
-    np.savez_compressed('dataset\\y_char',y)
+    np.savez_compressed('X_char',X)
+    np.savez_compressed('y_char',y)
 # print(X)
 # print(y)
 
